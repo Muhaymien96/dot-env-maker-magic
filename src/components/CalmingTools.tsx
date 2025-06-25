@@ -1,19 +1,17 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Heart, 
   Wind, 
-  Waves, 
   Mountain, 
   Play, 
   Pause, 
   RotateCcw,
   Flower2,
-  Sun,
-  Moon
+  Sun
 } from 'lucide-react';
 
 export const CalmingTools: React.FC = () => {
-  const [activeExercise, setActiveExercise] = useState<string | null>(null);
   const [breathingPhase, setBreathingPhase] = useState<'inhale' | 'hold' | 'exhale' | 'pause'>('inhale');
   const [breathingTimer, setBreathingTimer] = useState(0);
   const [isBreathingActive, setIsBreathingActive] = useState(false);
@@ -65,7 +63,6 @@ export const CalmingTools: React.FC = () => {
 
   const startBreathing = () => {
     setIsBreathingActive(true);
-    setActiveExercise('breathing');
     setBreathingPhase('inhale');
     setBreathingTimer(0);
     setBreathingCycle(0);
@@ -73,7 +70,6 @@ export const CalmingTools: React.FC = () => {
 
   const stopBreathing = () => {
     setIsBreathingActive(false);
-    setActiveExercise(null);
   };
 
   const resetBreathing = () => {

@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+
+import { useEffect } from 'react';
 import { useAuthStore } from './store';
 import { AuthenticatedApp } from './components/layout/AuthenticatedApp';
 import { PublicApp } from './components/layout/PublicApp';

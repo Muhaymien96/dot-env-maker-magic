@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Plus, 
@@ -17,8 +18,6 @@ import {
   Save,
   X,
   Lightbulb,
-  Target,
-  Sparkles,
   Play,
   Pause,
   RotateCcw,
@@ -101,6 +100,7 @@ export const TaskManager: React.FC = () => {
 
     const taskData = {
       ...newTask,
+      status: 'pending' as Task['status'],
       priority: coachingResponse?.priority_suggestion || newTask.priority,
       parent_task_id: newTask.parent_task_id || undefined,
       recurrence_pattern: newTask.recurrence_pattern || undefined,
@@ -135,7 +135,7 @@ export const TaskManager: React.FC = () => {
       input: workloadInput,
       type: 'brain_dump',
       context: {
-        existing_tasks: tasks.map(t => ({ title: t.title, priority: t.priority, status: t.status })),
+        existing_tasks: tasks.map(t => t.title),
         user_id: user?.id,
         include_historical_data: true,
         workload_breakdown: true,
@@ -154,6 +154,7 @@ export const TaskManager: React.FC = () => {
         title: taskSuggestion.title,
         description: taskSuggestion.description,
         priority: taskSuggestion.priority,
+        status: 'pending' as Task['status'],
         due_date: undefined,
         parent_task_id: undefined,
         recurrence_pattern: undefined,
@@ -171,6 +172,7 @@ export const TaskManager: React.FC = () => {
               title: subtaskTitle,
               description: `Subtask of: ${taskSuggestion.title}`,
               priority: 'medium' as Task['priority'],
+              status: 'pending' as Task['status'],
               due_date: undefined,
               parent_task_id: createdTask.id,
               tags: ['subtask'],
@@ -250,6 +252,7 @@ export const TaskManager: React.FC = () => {
       title: subtaskTitle,
       description: 'Generated from AI coaching',
       priority: 'medium' as Task['priority'],
+      status: 'pending' as Task['status'],
       due_date: undefined,
       parent_task_id: parentId,
       complexity: 2,
@@ -309,6 +312,7 @@ export const TaskManager: React.FC = () => {
       title: completedTask.title,
       description: completedTask.description,
       priority: completedTask.priority,
+      status: 'pending' as Task['status'],
       due_date: nextDueDate.toISOString(),
       recurrence_pattern: completedTask.recurrence_pattern,
       recurrence_end_date: completedTask.recurrence_end_date,
@@ -375,7 +379,7 @@ export const TaskManager: React.FC = () => {
 
   const addTag = () => {
     if (newTag.trim() && !newTask.tags.includes(newTag.trim())) {
-      setNewTask(prev => ({
+      setNewTask((prev: typeof newTask) => ({
         ...prev,
         tags: [...prev.tags, newTag.trim()]
       }));
@@ -384,15 +388,15 @@ export const TaskManager: React.FC = () => {
   };
 
   const removeTag = (tagToRemove: string) => {
-    setNewTask(prev => ({
+    setNewTask((prev: typeof newTask) => ({
       ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
+      tags: prev.tags.filter((tag: string) => tag !== tagToRemove)
     }));
   };
 
   const addEditTag = () => {
     if (newTag.trim() && !editFormData.tags.includes(newTag.trim())) {
-      setEditFormData(prev => ({
+      setEditFormData((prev: any) => ({
         ...prev,
         tags: [...prev.tags, newTag.trim()]
       }));
@@ -401,21 +405,10 @@ export const TaskManager: React.FC = () => {
   };
 
   const removeEditTag = (tagToRemove: string) => {
-    setEditFormData(prev => ({
+    setEditFormData((prev: any) => ({
       ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
+      tags: prev.tags.filter((tag: string) => tag !== tagToRemove)
     }));
-  };
-
-  const getStatusIcon = (status: Task['status']) => {
-    switch (status) {
-      case 'completed':
-        return <CheckCircle className="h-5 w-5 text-green-600" />;
-      case 'in_progress':
-        return <Clock className="h-5 w-5 text-blue-600" />;
-      default:
-        return <AlertCircle className="h-5 w-5 text-gray-400" />;
-    }
   };
 
   const getPriorityColor = (priority: Task['priority']) => {
@@ -635,7 +628,7 @@ export const TaskManager: React.FC = () => {
                 </h4>
                 
                 {task.recurrence_pattern && (
-                  <Repeat className="h-4 w-4 text-blue-600" title={`Repeats ${task.recurrence_pattern}`} />
+                  <Repeat className="h-4 w-4 text-blue-600" />
                 )}
               </div>
               
@@ -717,7 +710,7 @@ export const TaskManager: React.FC = () => {
   );
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = () => {
       if (showTaskMenu) {
         setShowTaskMenu(null);
       }

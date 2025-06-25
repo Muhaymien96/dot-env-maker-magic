@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { Brain, Volume2, VolumeX, Sparkles, CheckCircle, Clock, Plus, Target, Lightbulb, Edit3, X, Trash2 } from 'lucide-react';
+import { Brain, Volume2, VolumeX, CheckCircle, Clock, Plus, Lightbulb, Edit3, X, Trash2 } from 'lucide-react';
 import { useElevenLabsTTS } from '../hooks/useElevenLabsTTS';
 import { TaskEditForm } from './TaskEditForm';
 
@@ -75,14 +76,14 @@ export const AICoachResponse: React.FC<AICoachResponseProps> = ({
   };
 
   const handleAddAllTasks = async () => {
-    const tasksToAdd = editedTasks.filter((_, index) => !removedTaskIndices.has(index));
+    const tasksToAdd = editedTasks.filter((_, taskIndex) => !removedTaskIndices.has(taskIndex));
     if (tasksToAdd.length === 0 || !onAddAllTasks) return;
     
     setAddingTasks(true);
     try {
       await onAddAllTasks(tasksToAdd);
       // Mark all remaining tasks as removed after successful addition
-      const allIndices = new Set(editedTasks.map((_, index) => index));
+      const allIndices = new Set(editedTasks.map((_, taskIndex) => taskIndex));
       setRemovedTaskIndices(allIndices);
     } catch (error) {
       console.error('Error adding all tasks:', error);
@@ -91,14 +92,14 @@ export const AICoachResponse: React.FC<AICoachResponseProps> = ({
     }
   };
 
-  const handleAddSingleTask = async (task: TaskSuggestion, index: number) => {
+  const handleAddSingleTask = async (task: TaskSuggestion, taskIndex: number) => {
     if (!onTaskAdd) return;
     
-    setAddingTaskIndex(index);
+    setAddingTaskIndex(taskIndex);
     try {
       await onTaskAdd(task);
       // Remove this task from the suggestions after successful addition
-      setRemovedTaskIndices(prev => new Set([...prev, index]));
+      setRemovedTaskIndices(prev => new Set([...prev, taskIndex]));
     } catch (error) {
       console.error('Error adding single task:', error);
     } finally {
@@ -106,31 +107,31 @@ export const AICoachResponse: React.FC<AICoachResponseProps> = ({
     }
   };
 
-  const handleRemoveTask = (index: number) => {
-    setRemovedTaskIndices(prev => new Set([...prev, index]));
+  const handleRemoveTask = (taskIndex: number) => {
+    setRemovedTaskIndices(prev => new Set([...prev, taskIndex]));
   };
 
-  const handleEditTask = (index: number) => {
-    setEditingTask(index);
+  const handleEditTask = (taskIndex: number) => {
+    setEditingTask(taskIndex);
   };
 
-  const handleSaveEdit = (index: number) => {
+  const handleSaveEdit = (taskIndex: number) => {
     setEditingTask(null);
   };
 
-  const handleCancelEdit = (index: number) => {
-    const originalTask = response.suggested_tasks?.[index];
+  const handleCancelEdit = (taskIndex: number) => {
+    const originalTask = response.suggested_tasks?.[taskIndex];
     if (originalTask) {
       const newEditedTasks = [...editedTasks];
-      newEditedTasks[index] = { ...originalTask };
+      newEditedTasks[taskIndex] = { ...originalTask };
       setEditedTasks(newEditedTasks);
     }
     setEditingTask(null);
   };
 
-  const updateEditedTask = (index: number, field: keyof TaskSuggestion, value: any) => {
+  const updateEditedTask = (taskIndex: number, field: keyof TaskSuggestion, value: any) => {
     const newEditedTasks = [...editedTasks];
-    newEditedTasks[index] = { ...newEditedTasks[index], [field]: value };
+    newEditedTasks[taskIndex] = { ...newEditedTasks[taskIndex], [field]: value };
     setEditedTasks(newEditedTasks);
   };
 
@@ -151,7 +152,7 @@ export const AICoachResponse: React.FC<AICoachResponseProps> = ({
     const currentSubtasks = newEditedTasks[taskIndex].subtasks || [];
     newEditedTasks[taskIndex] = {
       ...newEditedTasks[taskIndex],
-      subtasks: currentSubtasks.filter((_, index) => index !== subtaskIndex)
+      subtasks: currentSubtasks.filter((_, subIndex) => subIndex !== subtaskIndex)
     };
     setEditedTasks(newEditedTasks);
   };
@@ -175,13 +176,13 @@ export const AICoachResponse: React.FC<AICoachResponseProps> = ({
     const currentTags = newEditedTasks[taskIndex].tags || [];
     newEditedTasks[taskIndex] = {
       ...newEditedTasks[taskIndex],
-      tags: currentTags.filter((_, index) => index !== tagIndex)
+      tags: currentTags.filter((_, tIndex) => tIndex !== tagIndex)
     };
     setEditedTasks(newEditedTasks);
   };
 
   const isWorkloadBreakdown = editedTasks && editedTasks.length > 0;
-  const visibleTasks = editedTasks.filter((_, index) => !removedTaskIndices.has(index));
+  const visibleTasks = editedTasks.filter((_, taskIndex) => !removedTaskIndices.has(taskIndex));
   const hasVisibleTasks = visibleTasks.length > 0;
 
   return (
@@ -258,7 +259,6 @@ export const AICoachResponse: React.FC<AICoachResponseProps> = ({
               </span>
             )}
             <span className="flex items-center space-x-1 text-indigo-700">
-              <Target className="h-4 w-4" />
               <span>{hasVisibleTasks ? visibleTasks.length : 0} tasks suggested</span>
             </span>
           </div>
@@ -316,15 +316,15 @@ export const AICoachResponse: React.FC<AICoachResponseProps> = ({
           </div>
           
           <div className="space-y-4">
-            {editedTasks.map((task, index) => {
-              if (removedTaskIndices.has(index)) return null;
+            {editedTasks.map((task, taskIndex) => {
+              if (removedTaskIndices.has(taskIndex)) return null;
               
               return (
-                <div key={index} className="bg-white p-4 rounded-lg border border-indigo-100">
-                  {editingTask === index ? (
+                <div key={taskIndex} className="bg-white p-4 rounded-lg border border-indigo-100">
+                  {editingTask === taskIndex ? (
                     <TaskEditForm
                       task={task}
-                      index={index}
+                      index={taskIndex}
                       onSave={handleSaveEdit}
                       onCancel={handleCancelEdit}
                       onUpdateTask={updateEditedTask}
@@ -373,7 +373,7 @@ export const AICoachResponse: React.FC<AICoachResponseProps> = ({
                         
                         <div className="flex items-center space-x-2 ml-3">
                           <button
-                            onClick={() => handleEditTask(index)}
+                            onClick={() => handleEditTask(taskIndex)}
                             className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
                             aria-label={`Edit task: ${task.title}`}
                           >
@@ -381,7 +381,7 @@ export const AICoachResponse: React.FC<AICoachResponseProps> = ({
                           </button>
                           
                           <button
-                            onClick={() => handleRemoveTask(index)}
+                            onClick={() => handleRemoveTask(taskIndex)}
                             className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             aria-label={`Remove task: ${task.title}`}
                           >
@@ -390,12 +390,12 @@ export const AICoachResponse: React.FC<AICoachResponseProps> = ({
                           
                           {onTaskAdd && (
                             <button
-                              onClick={() => handleAddSingleTask(task, index)}
-                              disabled={addingTaskIndex === index}
+                              onClick={() => handleAddSingleTask(task, taskIndex)}
+                              disabled={addingTaskIndex === taskIndex}
                               className="px-3 py-1 bg-indigo-600 text-white text-xs rounded-md hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                               aria-label={`Add task: ${task.title}`}
                             >
-                              {addingTaskIndex === index ? (
+                              {addingTaskIndex === taskIndex ? (
                                 <div className="flex items-center space-x-1">
                                   <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
                                   <span>Adding...</span>
@@ -434,9 +434,9 @@ export const AICoachResponse: React.FC<AICoachResponseProps> = ({
             <span>Suggested Steps:</span>
           </h4>
           <div className="space-y-2">
-            {response.subtasks.map((subtask, index) => (
+            {response.subtasks.map((subtask, subtaskIndex) => (
               <div
-                key={index}
+                key={subtaskIndex}
                 className="flex items-center justify-between bg-white p-3 rounded-lg border border-indigo-100"
               >
                 <span className="text-gray-700 text-sm flex-grow">{subtask}</span>
@@ -458,7 +458,7 @@ export const AICoachResponse: React.FC<AICoachResponseProps> = ({
       {/* Encouragement */}
       <div className="bg-white/70 p-4 rounded-xl border border-purple-100">
         <div className="flex items-start space-x-2">
-          <Sparkles className="h-4 w-4 text-purple-600 mt-0.5 flex-shrink-0" />
+          <div className="h-4 w-4 text-purple-600 mt-0.5 flex-shrink-0">✨</div>
           <p className="text-purple-800 text-sm italic leading-relaxed">
             {response.encouragement}
           </p>
