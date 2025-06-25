@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Plus, 
@@ -19,7 +18,6 @@ import {
   X,
   Lightbulb,
   Play,
-  Pause,
   RotateCcw,
   Star,
   Gauge
@@ -33,7 +31,7 @@ interface TaskSuggestion {
   title: string;
   description: string;
   priority: 'low' | 'medium' | 'high';
-  estimated_time: string;
+  estimated_time?: string;
   subtasks?: string[];
   tags?: string[];
   complexity?: number;
@@ -138,7 +136,6 @@ export const TaskManager: React.FC = () => {
         existing_tasks: tasks.map(t => t.title),
         user_id: user?.id,
         include_historical_data: true,
-        workload_breakdown: true,
       }
     });
 
@@ -379,7 +376,7 @@ export const TaskManager: React.FC = () => {
 
   const addTag = () => {
     if (newTag.trim() && !newTask.tags.includes(newTag.trim())) {
-      setNewTask((prev: typeof newTask) => ({
+      setNewTask((prev) => ({
         ...prev,
         tags: [...prev.tags, newTag.trim()]
       }));
@@ -388,9 +385,9 @@ export const TaskManager: React.FC = () => {
   };
 
   const removeTag = (tagToRemove: string) => {
-    setNewTask((prev: typeof newTask) => ({
+    setNewTask((prev) => ({
       ...prev,
-      tags: prev.tags.filter((tag: string) => tag !== tagToRemove)
+      tags: prev.tags.filter((tag) => tag !== tagToRemove)
     }));
   };
 
