@@ -2,102 +2,341 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
-
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
+/* Global accessibility and appearance styles */
+:root {
+  --text-size: 16px;
+  --line-height: 1.5;
+  --animation-duration: 0.2s;
+  
+  /* Base color variables */
+  --primary-color: #4f46e5;
+  --accent-color: #7c3aed;
+  --background-color: #f8fafc;
+  --text-color: #1f2937;
+  --surface-color: #ffffff;
+  --border-color: #e5e7eb;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
+/* Neurodivergent-specific color schemes */
+.nd-adhd {
+  --primary-color: #f59e0b;
+  --accent-color: #f97316;
+  --background-color: #fffbeb;
+  --text-color: #92400e;
+  --surface-color: #fef3c7;
+  --border-color: #fcd34d;
+}
 
-  body {
-    @apply bg-background text-foreground;
-  }
+.nd-autism {
+  --primary-color: #0ea5e9;
+  --accent-color: #06b6d4;
+  --background-color: #f0f9ff;
+  --text-color: #0c4a6e;
+  --surface-color: #e0f2fe;
+  --border-color: #7dd3fc;
+}
+
+.nd-anxiety {
+  --primary-color: #10b981;
+  --accent-color: #059669;
+  --background-color: #ecfdf5;
+  --text-color: #064e3b;
+  --surface-color: #d1fae5;
+  --border-color: #6ee7b7;
+}
+
+.nd-multiple {
+  --primary-color: #8b5cf6;
+  --accent-color: #7c3aed;
+  --background-color: #faf5ff;
+  --text-color: #581c87;
+  --surface-color: #ede9fe;
+  --border-color: #c4b5fd;
+}
+
+/* Mood theme classes */
+.mood-theme-energetic {
+  --primary-color: #059669;
+  --accent-color: #10b981;
+  --background-color: #ecfdf5;
+  --text-color: #064e3b;
+  --surface-color: #d1fae5;
+}
+
+.mood-theme-calm {
+  --primary-color: #0ea5e9;
+  --accent-color: #06b6d4;
+  --background-color: #f0f9ff;
+  --text-color: #0c4a6e;
+  --surface-color: #e0f2fe;
+}
+
+.mood-theme-focused {
+  --primary-color: #7c3aed;
+  --accent-color: #8b5cf6;
+  --background-color: #faf5ff;
+  --text-color: #581c87;
+  --surface-color: #ede9fe;
+}
+
+.mood-theme-low-energy {
+  --primary-color: #f59e0b;
+  --accent-color: #f97316;
+  --background-color: #fffbeb;
+  --text-color: #92400e;
+  --surface-color: #fef3c7;
+}
+
+.mood-theme-stressed {
+  --primary-color: #dc2626;
+  --accent-color: #ef4444;
+  --background-color: #fef2f2;
+  --text-color: #991b1b;
+  --surface-color: #fecaca;
+}
+
+/* Dark palette for low sensory mode */
+.dark-palette {
+  --primary-color: #6366f1;
+  --accent-color: #8b5cf6;
+  --background-color: #1f2937;
+  --text-color: #f9fafb;
+  --surface-color: #374151;
+  --border-color: #4b5563;
+}
+
+.low-sensory-palette {
+  --primary-color: #6b7280;
+  --accent-color: #9ca3af;
+  --background-color: #f3f4f6;
+  --text-color: #374151;
+  --surface-color: #ffffff;
+  --border-color: #d1d5db;
+}
+
+/* High contrast mode */
+.high-contrast {
+  --primary-color: #000000;
+  --accent-color: #000000;
+  --background-color: #ffffff;
+  --text-color: #000000;
+  --surface-color: #ffffff;
+  --border-color: #000000;
+}
+
+.high-contrast * {
+  border-color: #000000 !important;
+}
+
+.high-contrast .bg-white {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+.high-contrast .text-gray-900 {
+  color: #000000 !important;
+}
+
+.high-contrast .text-gray-600 {
+  color: #000000 !important;
+}
+
+/* Reduced motion */
+.reduce-motion * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Minimalist mode */
+.minimalist .shadow-lg,
+.minimalist .shadow-md,
+.minimalist .shadow-sm {
+  box-shadow: none !important;
+}
+
+.minimalist .bg-gradient-to-br,
+.minimalist .bg-gradient-to-r {
+  background: var(--background-color) !important;
+}
+
+.minimalist .border-2 {
+  border-width: 1px !important;
+}
+
+/* Colorblind friendly mode */
+.colorblind-friendly .bg-red-500,
+.colorblind-friendly .bg-red-600 {
+  background-color: #0066cc !important;
+}
+
+.colorblind-friendly .bg-green-500,
+.colorblind-friendly .bg-green-600 {
+  background-color: #ff9900 !important;
+}
+
+.colorblind-friendly .text-red-600 {
+  color: #0066cc !important;
+}
+
+.colorblind-friendly .text-green-600 {
+  color: #ff9900 !important;
+}
+
+/* Dyslexia friendly font */
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: url('https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/fonts/OpenDyslexic-Regular.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* Touch target minimum size */
+button, 
+input[type="button"], 
+input[type="submit"], 
+input[type="reset"], 
+a {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Focus indicators */
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Reading mode styles */
+.reading-mode {
+  font-size: var(--text-size);
+  line-height: var(--line-height);
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+/* Animation speed control */
+.animation-slow * {
+  animation-duration: calc(var(--animation-duration) * 2) !important;
+  transition-duration: calc(var(--animation-duration) * 2) !important;
+}
+
+.animation-fast * {
+  animation-duration: calc(var(--animation-duration) * 0.5) !important;
+  transition-duration: calc(var(--animation-duration) * 0.5) !important;
+}
+
+/* CSS custom property utilities */
+.bg-primary {
+  background-color: var(--primary-color);
+}
+
+.text-primary {
+  color: var(--primary-color);
+}
+
+.border-primary {
+  border-color: var(--primary-color);
+}
+
+.bg-accent {
+  background-color: var(--accent-color);
+}
+
+.text-accent {
+  color: var(--accent-color);
+}
+
+.bg-surface {
+  background-color: var(--surface-color);
+}
+
+.text-surface {
+  color: var(--text-color);
+}
+
+/* Ensure proper contrast ratios */
+.bg-indigo-50 {
+  color: #1e1b4b;
+}
+
+.bg-purple-50 {
+  color: #581c87;
+}
+
+.bg-blue-50 {
+  color: #1e3a8a;
+}
+
+.bg-green-50 {
+  color: #14532d;
+}
+
+.bg-yellow-50 {
+  color: #92400e;
+}
+
+.bg-red-50 {
+  color: #991b1b;
+}
+
+/* Notification styles */
+.notification-enter {
+  opacity: 0;
+  transform: translateX(100%);
+}
+
+.notification-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.notification-exit {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.notification-exit-active {
+  opacity: 0;
+  transform: translateX(100%);
+  transition: opacity 300ms, transform 300ms;
+}
+
+/* Responsive text sizing */
+.text-responsive {
+  font-size: var(--text-size);
+  line-height: var(--line-height);
+}
+
+/* Mood-responsive animations */
+@keyframes gentle-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes energetic-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes calm-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+.mood-animation-gentle {
+  animation: gentle-pulse 3s ease-in-out infinite;
+}
+
+.mood-animation-energetic {
+  animation: energetic-bounce 2s ease-in-out infinite;
+}
+
+.mood-animation-calm {
+  animation: calm-float 4s ease-in-out infinite;
 }

@@ -1,27 +1,25 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
+import React, { useEffect } from 'react';
+import { useAuthStore } from './store';
+import { AuthenticatedApp } from './components/layout/AuthenticatedApp';
+import { PublicApp } from './components/layout/PublicApp';
+import { LoadingSpinner } from './components/ui/LoadingSpinner';
 
-const queryClient = new QueryClient();
+function App() {
+  const { user, loading, isAuthenticated, initialize } = useAuthStore();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  return isAuthenticated ? (
+    <AuthenticatedApp user={user} />
+  ) : (
+    <PublicApp />
+  );
+}
 
 export default App;
