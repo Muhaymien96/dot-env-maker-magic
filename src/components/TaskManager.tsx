@@ -1,7 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Plus, 
-  CheckCircle, 
   Clock, 
   AlertCircle, 
   Trash2, 
@@ -358,7 +358,7 @@ export const TaskManager: React.FC = () => {
             className="p-1 text-blue-600 hover:bg-blue-50 rounded"
             aria-label={`Mark task "${task.title}" as completed`}
           >
-            <CheckCircle className="h-4 w-4" />
+            <Clock className="h-4 w-4" />
           </button>
         );
       default:
@@ -552,25 +552,25 @@ export const TaskManager: React.FC = () => {
     </div>
   );
 
-  const renderTaskMenu = (task: any) => (
+  const renderTaskMenu = (currentTask: any) => (
     <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-48">
       <div className="py-1">
         <button
-          onClick={() => handleEditTask(task)}
+          onClick={() => handleEditTask(currentTask)}
           className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
         >
           <Edit3 className="h-4 w-4" />
           <span>Edit Task</span>
         </button>
         <button
-          onClick={() => handleUpdateTaskStatus(task.id, task.status === 'in_progress' ? 'pending' : 'in_progress')}
+          onClick={() => handleUpdateTaskStatus(currentTask.id, currentTask.status === 'in_progress' ? 'pending' : 'in_progress')}
           className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
         >
           <Clock className="h-4 w-4" />
-          <span>{task.status === 'in_progress' ? 'Mark as Pending' : 'Start Working'}</span>
+          <span>{currentTask.status === 'in_progress' ? 'Mark as Pending' : 'Start Working'}</span>
         </button>
         <button
-          onClick={() => handleDeleteTask(task.id)}
+          onClick={() => handleDeleteTask(currentTask.id)}
           className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
         >
           <Trash2 className="h-4 w-4" />

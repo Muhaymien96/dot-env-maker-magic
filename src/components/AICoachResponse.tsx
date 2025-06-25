@@ -1,10 +1,9 @@
+
 import React from 'react';
 import { 
-  CheckCircle, 
   X, 
   Plus, 
   Brain, 
-  Target, 
   Clock, 
   Tag,
   Star,
@@ -121,7 +120,6 @@ export const AICoachResponse: React.FC<AICoachResponseProps> = ({
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h5 className="font-medium text-purple-900 flex items-center space-x-2">
-              <Target className="h-4 w-4" />
               <span>Suggested Tasks ({tasks.length})</span>
             </h5>
             {onAddAllTasks && (
@@ -135,8 +133,8 @@ export const AICoachResponse: React.FC<AICoachResponseProps> = ({
           </div>
 
           <div className="space-y-3">
-            {tasks.map((task) => (
-              <div key={task.title} className="bg-white/70 p-4 rounded-lg border border-purple-200">
+            {tasks.map((task, taskIndex) => (
+              <div key={taskIndex} className="bg-white/70 p-4 rounded-lg border border-purple-200">
                 <div className="flex items-start justify-between mb-2">
                   <h6 className="font-medium text-purple-900">{task.title}</h6>
                   {onTaskAdd && (
@@ -182,10 +180,10 @@ export const AICoachResponse: React.FC<AICoachResponseProps> = ({
 
                 {task.subtasks && task.subtasks.length > 0 && (
                   <div className="mt-3">
-                    <h7 className="text-sm font-medium text-purple-800 mb-2 block">Subtasks:</h7>
+                    <p className="text-sm font-medium text-purple-800 mb-2">Subtasks:</p>
                     <ul className="space-y-1">
-                      {task.subtasks.map((subtask) => (
-                        <li key={subtask} className="flex items-center justify-between text-sm text-purple-700">
+                      {task.subtasks.map((subtask, subtaskIndex) => (
+                        <li key={subtaskIndex} className="flex items-center justify-between text-sm text-purple-700">
                           <span>• {subtask}</span>
                           {onSubtaskAdd && (
                             <button
