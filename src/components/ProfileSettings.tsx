@@ -472,7 +472,7 @@ export const ProfileSettings: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium text-gray-900">Mood-Responsive Colors</p>
-                  <p className="text-sm text-gray-600">Adapt interface colors based on your mood</p>
+                  <p className="text-sm text-gray-600">Adapt interface colors based on your mood.</p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
