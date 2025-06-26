@@ -1,6 +1,7 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { User } from '@supabase/supabase-js';
-import { Brain, Sparkles, User as UserIcon, LogOut } from 'lucide-react';
+import { Brain, Sparkles, User as UserIcon, LogOut, Menu, X } from 'lucide-react';
 import { useAuthStore } from '../../store';
 
 type ActiveTab = 'focus' | 'tasks' | 'mood' | 'braindump' | 'profile';
@@ -28,13 +29,30 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   showBackButton = false
 }) => {
   const { signOut } = useAuthStore();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleSignOut = async () => {
     try {
       await signOut();
+      setIsMobileMenuOpen(false);
     } catch (error) {
       console.error('Error signing out:', error);
     }
+  };
+
+  const handleTabClick = (tab: ActiveTab) => {
+    setActiveTab?.(tab);
+    setIsMobileMenuOpen(false);
+  };
+
+  const handlePageNavigation = (page: ContentPage) => {
+    onPageNavigation?.(page);
+    setIsMobileMenuOpen(false);
+  };
+
+  const handleAuthModal = (mode: 'signin' | 'signup') => {
+    onAuthModal?.(mode);
+    setIsMobileMenuOpen(false);
   };
 
   return (
@@ -59,7 +77,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             </div>
           </button>
 
-          {/* Navigation */}
+          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             {isAuthenticated ? (
               <>
@@ -160,14 +178,123 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 
           {/* Mobile menu button */}
           <button 
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            aria-label="Open mobile menu"
+            aria-label={isMobileMenuOpen ? "Close mobile menu" : "Open mobile menu"}
           >
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
+            {isMobileMenuOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
           </button>
         </div>
+
+        {/* Mobile Navigation Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-gray-200 py-4 space-y-2">
+            {isAuthenticated ? (
+              <>
+                <button
+                  onClick={() => handleTabClick('focus')}
+                  className={`block w-full text-left px-4 py-2 rounded-lg transition-colors font-medium ${
+                    activeTab === 'focus' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  Focus Mode
+                </button>
+                <button
+                  onClick={() => handleTabClick('braindump')}
+                  className={`block w-full text-left px-4 py-2 rounded-lg transition-colors font-medium ${
+                    activeTab === 'braindump' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  Brain Dump
+                </button>
+                <button
+                  onClick={() => handleTabClick('tasks')}
+                  className={`block w-full text-left px-4 py-2 rounded-lg transition-colors font-medium ${
+                    activeTab === 'tasks' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  Tasks
+                </button>
+                <button
+                  onClick={() => handleTabClick('mood')}
+                  className={`block w-full text-left px-4 py-2 rounded-lg transition-colors font-medium ${
+                    activeTab === 'mood' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  Mood
+                </button>
+                <div className="border-t border-gray-200 pt-2 mt-2">
+                  <button
+                    onClick={() => handleTabClick('profile')}
+                    className={`flex items-center space-x-2 w-full text-left px-4 py-2 rounded-lg transition-colors font-medium ${
+                      activeTab === 'profile' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    <UserIcon className="h-4 w-4" />
+                    <span>Profile</span>
+                  </button>
+                  <button
+                    onClick={handleSignOut}
+                    className="flex items-center space-x-2 w-full text-left px-4 py-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors font-medium"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                {showBackButton ? (
+                  <div className="px-4 py-2">
+                    <div className="text-sm text-gray-600 mb-2">{user?.email}</div>
+                    <button
+                      onClick={() => {
+                        onBackToApp?.();
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                    >
+                      Back to App
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => handlePageNavigation('features')}
+                      className="block w-full text-left px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors font-medium"
+                    >
+                      Features
+                    </button>
+                    <button
+                      onClick={() => handlePageNavigation('pricing')}
+                      className="block w-full text-left px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors font-medium"
+                    >
+                      Pricing
+                    </button>
+                    <div className="border-t border-gray-200 pt-2 mt-2">
+                      <button
+                        onClick={() => handleAuthModal('signin')}
+                        className="block w-full text-left px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors font-medium"
+                      >
+                        Sign In
+                      </button>
+                      <button
+                        onClick={() => handleAuthModal('signup')}
+                        className="block w-full text-left px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors font-medium mt-2"
+                      >
+                        Get Started
+                      </button>
+                    </div>
+                  </>
+                )}
+              </>
+            )}
+          </div>
+        )}
       </div>
     </header>
   );

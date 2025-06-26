@@ -8,7 +8,7 @@ import { AuthModal } from '../AuthModal';
 import { NotificationCenter } from '../NotificationCenter';
 import { useSettingsStore, useMoodStore, useProfileStore } from '../../store';
 
-type ActiveTab = 'focus' | 'tasks' | 'mood' | 'braindump' | 'profile' | 'calming';
+type ActiveTab = 'focus' | 'tasks' | 'mood' | 'braindump' | 'profile';
 
 interface AuthenticatedAppProps {
   user: User | null;
@@ -118,13 +118,6 @@ export const AuthenticatedApp: React.FC<AuthenticatedAppProps> = ({ user }) => {
     }
   }, [appearance, moodEntries, profile]);
 
-  const renderMainContent = () => {
-    if (activeTab === 'calming') {
-      return <CalmingTools />;
-    }
-    return <MainContent activeTab={activeTab} user={user} />;
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex flex-col">
       <AppHeader 
@@ -172,7 +165,7 @@ export const AuthenticatedApp: React.FC<AuthenticatedAppProps> = ({ user }) => {
       
       <div className="flex-grow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {renderMainContent()}
+          <MainContent activeTab={activeTab} user={user} />
         </div>
       </div>
       

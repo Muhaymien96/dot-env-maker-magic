@@ -1,258 +1,308 @@
 
 import React, { useState } from 'react';
-import { Save, X, Calendar, Repeat, Tag } from 'lucide-react';
-import { Task } from '../lib/supabase';
+import { X, Plus, Calendar, Clock, Flag, Hash, Zap, User } from 'lucide-react';
 
 interface TaskFormProps {
-  isEditing?: boolean;
-  task?: any;
-  onSave: (taskData: any) => void;
-  onCancel: () => void;
-  availableTasks: any[];
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (task: any) => void;
+  initialTask?: any;
+  isEdit?: boolean;
 }
 
 export const TaskForm: React.FC<TaskFormProps> = ({
-  isEditing = false,
-  task,
-  onSave,
-  onCancel,
-  availableTasks
+  isOpen,
+  onClose,
+  onSubmit,
+  initialTask,
+  isEdit = false
 }) => {
-  const [formData, setFormData] = useState({
-    title: task?.title || '',
-    description: task?.description || '',
-    priority: task?.priority || 'medium' as Task['priority'],
-    due_date: task?.due_date ? new Date(task.due_date).toISOString().slice(0, 16) : '',
-    parent_task_id: task?.parent_task_id || '',
-    recurrence_pattern: task?.recurrence_pattern || '',
-    recurrence_end_date: task?.recurrence_end_date || '',
-    tags: task?.tags || [] as string[],
-    complexity: task?.complexity || 3,
-    estimated_time: task?.estimated_time || '',
+  const [task, setTask] = useState({
+    title: initialTask?.title || '',
+    description: initialTask?.description || '',
+    priority: initialTask?.priority || 'medium',
+    due_date: initialTask?.due_date || '',
+    estimated_duration: initialTask?.estimated_duration || 60,
+    tags: initialTask?.tags || [],
+    energy_level: initialTask?.energy_level || 'medium',
+    context: initialTask?.context || '',
+    subtasks: initialTask?.subtasks || []
   });
+
   const [newTag, setNewTag] = useState('');
+  const [newSubtask, setNewSubtask] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(task);
+    onClose();
+  };
 
   const addTag = () => {
-    if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        tags: [...prev.tags, newTag.trim()]
-      }));
+    if (newTag.trim() && !task.tags.includes(newTag.trim())) {
+      setTask({
+        ...task,
+        tags: [...task.tags, newTag.trim()]
+      });
       setNewTag('');
     }
   };
 
-  const removeTag = (tagToRemove: string) => {
-    setFormData(prev => ({
-      ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
-    }));
+  const removeTag = (tag: string) => {
+    setTask({
+      ...task,
+      tags: task.tags.filter((t: string) => t !== tag)
+    });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave(formData);
+  const addSubtask = () => {
+    if (newSubtask.trim()) {
+      setTask({
+        ...task,
+        subtasks: [...task.subtasks, { 
+          title: newSubtask.trim(), 
+          completed: false,
+          id: Date.now().toString()
+        }]
+      });
+      setNewSubtask('');
+    }
   };
+
+  const removeSubtask = (index: number) => {
+    setTask({
+      ...task,
+      subtasks: task.subtasks.filter((_: any, i: number) => i !== index)
+    });
+  };
+
+  if (!isOpen) return null;
 
   return (
-    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Task Title
-          </label>
-          <input
-            type="text"
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            placeholder="What do you need to do?"
-          />
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between rounded-t-2xl">
+          <h2 className="text-2xl font-bold text-gray-900">
+            {isEdit ? 'Edit Task' : 'Create New Task'}
+          </h2>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <X className="h-5 w-5 text-gray-500" />
+          </button>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Description (optional)
-          </label>
-          <textarea
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            placeholder="Add more details..."
-          />
-        </div>
-
-        <div className="grid grid-cols-3 gap-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* Title */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Priority
-            </label>
-            <select
-              value={formData.priority}
-              onChange={(e) => setFormData({ ...formData, priority: e.target.value as Task['priority'] })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            >
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Complexity (1-5 stars)
-            </label>
-            <select
-              value={formData.complexity}
-              onChange={(e) => setFormData({ ...formData, complexity: parseInt(e.target.value) })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            >
-              {[1, 2, 3, 4, 5].map(level => (
-                <option key={level} value={level}>{level} Star{level !== 1 ? 's' : ''}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Estimated Time
+            <label className="block text-sm font-semibold text-gray-900 mb-2">
+              Task Title *
             </label>
             <input
               type="text"
-              value={formData.estimated_time}
-              onChange={(e) => setFormData({ ...formData, estimated_time: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              placeholder="e.g., 2 hours, 30 min"
+              value={task.title}
+              onChange={(e) => setTask({ ...task, title: e.target.value })}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              placeholder="What needs to be done?"
+              required
             />
           </div>
-        </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            <Calendar className="inline h-4 w-4 mr-1" />
-            Due Date (optional)
-          </label>
-          <input
-            type="datetime-local"
-            value={formData.due_date}
-            onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
+          {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Parent Task (optional)
+            <label className="block text-sm font-semibold text-gray-900 mb-2">
+              Description
             </label>
-            <select
-              value={formData.parent_task_id}
-              onChange={(e) => setFormData({ ...formData, parent_task_id: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            >
-              <option value="">None (Top-level task)</option>
-              {availableTasks.map(task => (
-                <option key={task.id} value={task.id}>{task.title}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Repeat className="inline h-4 w-4 mr-1" />
-              Recurrence (optional)
-            </label>
-            <select
-              value={formData.recurrence_pattern}
-              onChange={(e) => setFormData({ ...formData, recurrence_pattern: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            >
-              <option value="">No recurrence</option>
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-              <option value="yearly">Yearly</option>
-            </select>
-          </div>
-        </div>
-
-        {formData.recurrence_pattern && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Recurrence End Date (optional)
-            </label>
-            <input
-              type="date"
-              value={formData.recurrence_end_date}
-              onChange={(e) => setFormData({ ...formData, recurrence_end_date: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            <textarea
+              value={task.description}
+              onChange={(e) => setTask({ ...task, description: e.target.value })}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              placeholder="Add more details about this task..."
+              rows={3}
             />
           </div>
-        )}
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            <Tag className="inline h-4 w-4 mr-1" />
-            Tags
-          </label>
-          <div className="flex space-x-2 mb-2">
+          {/* Priority & Energy Level */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-900 mb-2">
+                <Flag className="inline h-4 w-4 mr-1" />
+                Priority
+              </label>
+              <select
+                value={task.priority}
+                onChange={(e) => setTask({ ...task, priority: e.target.value })}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              >
+                <option value="low">Low Priority</option>
+                <option value="medium">Medium Priority</option>
+                <option value="high">High Priority</option>
+                <option value="urgent">Urgent</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-900 mb-2">
+                <Zap className="inline h-4 w-4 mr-1" />
+                Energy Level Required
+              </label>
+              <select
+                value={task.energy_level}
+                onChange={(e) => setTask({ ...task, energy_level: e.target.value })}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              >
+                <option value="low">Low Energy</option>
+                <option value="medium">Medium Energy</option>
+                <option value="high">High Energy</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Due Date & Duration */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-900 mb-2">
+                <Calendar className="inline h-4 w-4 mr-1" />
+                Due Date
+              </label>
+              <input
+                type="date"
+                value={task.due_date}
+                onChange={(e) => setTask({ ...task, due_date: e.target.value })}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-900 mb-2">
+                <Clock className="inline h-4 w-4 mr-1" />
+                Estimated Duration (minutes)
+              </label>
+              <input
+                type="number"
+                value={task.estimated_duration}
+                onChange={(e) => setTask({ ...task, estimated_duration: parseInt(e.target.value) || 0 })}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                min="5"
+                step="5"
+              />
+            </div>
+          </div>
+
+          {/* Context */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">
+              <User className="inline h-4 w-4 mr-1" />
+              Context/Location
+            </label>
             <input
               type="text"
-              value={newTag}
-              onChange={(e) => setNewTag(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-              placeholder="Add a tag..."
-              className="flex-grow px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              value={task.context}
+              onChange={(e) => setTask({ ...task, context: e.target.value })}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              placeholder="e.g., @home, @office, @computer"
             />
-            <button
-              type="button"
-              onClick={addTag}
-              className="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-            >
-              Add
-            </button>
           </div>
-          {formData.tags.length > 0 && (
+
+          {/* Tags */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">
+              <Hash className="inline h-4 w-4 mr-1" />
+              Tags
+            </label>
+            <div className="flex gap-2 mb-2">
+              <input
+                type="text"
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                placeholder="Add a tag..."
+              />
+              <button
+                type="button"
+                onClick={addTag}
+                className="px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+            </div>
             <div className="flex flex-wrap gap-2">
-              {formData.tags.map(tag => (
+              {task.tags.map((tag: string) => (
                 <span
                   key={tag}
-                  className="flex items-center space-x-1 px-2 py-1 bg-indigo-100 text-indigo-800 text-sm rounded-full"
+                  className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-indigo-100 text-indigo-800"
                 >
-                  <span>{tag}</span>
+                  {tag}
                   <button
                     type="button"
                     onClick={() => removeTag(tag)}
-                    className="text-indigo-600 hover:text-indigo-800"
+                    className="ml-2 p-0.5 hover:bg-indigo-200 rounded-full transition-colors"
                   >
-                    ×
+                    <X className="h-3 w-3" />
                   </button>
                 </span>
               ))}
             </div>
-          )}
-        </div>
+          </div>
 
-        <div className="flex space-x-3">
-          <button
-            type="submit"
-            className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
-          >
-            <Save className="h-4 w-4" />
-            <span>{isEditing ? 'Update Task' : 'Create Task'}</span>
-          </button>
-          <button
-            type="button"
-            onClick={onCancel}
-            className="flex items-center space-x-2 bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
-          >
-            <X className="h-4 w-4" />
-            <span>Cancel</span>
-          </button>
-        </div>
-      </form>
+          {/* Subtasks */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">
+              Subtasks
+            </label>
+            <div className="flex gap-2 mb-2">
+              <input
+                type="text"
+                value={newSubtask}
+                onChange={(e) => setNewSubtask(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSubtask())}
+                className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                placeholder="Add a subtask..."
+              />
+              <button
+                type="button"
+                onClick={addSubtask}
+                className="px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="space-y-2">
+              {task.subtasks.map((subtask: any, index: number) => (
+                <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                  <span className="flex-1">{subtask.title}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeSubtask(index)}
+                    className="p-1 hover:bg-gray-200 rounded-full transition-colors"
+                  >
+                    <X className="h-4 w-4 text-gray-500" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+            >
+              {isEdit ? 'Update Task' : 'Create Task'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

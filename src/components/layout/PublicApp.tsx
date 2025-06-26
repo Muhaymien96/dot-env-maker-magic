@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { AppHeader } from './AppHeader';
 import { AppFooter } from './AppFooter';
@@ -6,7 +7,7 @@ import { FeaturesSection } from '../sections/FeaturesSection';
 import { ContentPages } from '../ContentPages';
 import { AuthModal } from '../AuthModal';
 
-type ContentPage = 'features' | 'pricing' | 'integrations' | 'help' | 'contact' | 'privacy';
+type ContentPage = 'features' | 'pricing' | 'help' | 'contact' | 'privacy';
 
 export const PublicApp: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<ContentPage | null>(null);
