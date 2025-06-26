@@ -1,9 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
-import { useTaskStore } from '../store';
+import { useTasksStore } from '../store';
 import { TaskForm } from './TaskForm';
 import { TaskCard } from './TaskCard';
-import { TaskMenu } from './TaskMenu';
 import { WorkloadBreakdown } from './WorkloadBreakdown';
 import { TasksHeader } from './TasksHeader';
 
@@ -34,7 +34,7 @@ export const TaskManager: React.FC = () => {
     createTask, 
     updateTask, 
     deleteTask 
-  } = useTaskStore();
+  } = useTasksStore();
 
   const [showForm, setShowForm] = useState(false);
   const [editingTask, setEditingTask] = useState<ExtendedTask | null>(null);
@@ -174,18 +174,10 @@ export const TaskManager: React.FC = () => {
   return (
     <div className="space-y-6">
       <TasksHeader
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        filterStatus={filterStatus}
-        setFilterStatus={setFilterStatus}
-        filterPriority={filterPriority}
-        setFilterPriority={setFilterPriority}
-        sortBy={sortBy}
-        setSortBy={setSortBy}
         onCreateTask={() => setShowForm(true)}
       />
 
-      <WorkloadBreakdown tasks={tasks} />
+      <WorkloadBreakdown />
 
       {/* Task Form */}
       {showForm && (
@@ -193,7 +185,6 @@ export const TaskManager: React.FC = () => {
           <TaskForm
             onSubmit={handleCreateTask}
             onCancel={() => setShowForm(false)}
-            availableTasks={tasks}
           />
         </div>
       )}
@@ -205,7 +196,6 @@ export const TaskManager: React.FC = () => {
             isEdit={true}
             onSubmit={handleUpdateTask}
             onCancel={() => setEditingTask(null)}
-            availableTasks={tasks}
           />
         </div>
       )}
@@ -238,7 +228,6 @@ export const TaskManager: React.FC = () => {
             <TaskCard
               key={task.id}
               task={task}
-              onStatusChange={handleStatusChange}
               onEdit={handleEditTask}
               onDelete={handleDeleteTask}
             />

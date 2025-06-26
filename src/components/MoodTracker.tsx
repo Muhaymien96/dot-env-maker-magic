@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { Heart, Battery, Focus, Plus, TrendingUp, BarChart3, Calendar, Lightbulb } from 'lucide-react';
+import { Heart, Battery, Focus, Plus, TrendingUp, Calendar, Lightbulb } from 'lucide-react';
 import { useMoodStore, useAuthStore } from '../store';
 import { useAICoach } from '../hooks/useAICoach';
 
@@ -57,15 +58,13 @@ export const MoodTracker: React.FC = () => {
     error, 
     loadEntries, 
     createEntry, 
-    getAverages, 
-    getRecentTrend 
+    getAverages
   } = useMoodStore();
   
   const { getContextualInsights } = useAICoach();
   const [insights, setInsights] = useState<MoodInsights | null>(null);
   const [insightsLoading, setInsightsLoading] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showInsights, setShowInsights] = useState(false);
   const [viewMode, setViewMode] = useState<'recent' | 'trends' | 'insights'>('recent');
   const [newEntry, setNewEntry] = useState({
     mood_score: 5,
@@ -129,22 +128,22 @@ export const MoodTracker: React.FC = () => {
       <div className="flex items-center space-x-2">
         {icon}
         <label className="text-sm font-medium text-gray-700">{label}</label>
-        <span className="text-lg">{emojis.find(e => e.score === value)?.emoji}</span>
-        <span className="text-sm text-gray-600">{emojis.find(e => e.score === value)?.label}</span>
+        <span className="text-base sm:text-lg">{emojis.find(e => e.score === value)?.emoji}</span>
+        <span className="text-xs sm:text-sm text-gray-600">{emojis.find(e => e.score === value)?.label}</span>
       </div>
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-5 sm:grid-cols-10 gap-1 sm:gap-2">
         {emojis.map((emoji) => (
           <button
             key={emoji.score}
             type="button"
             onClick={() => onChange(emoji.score)}
-            className={`p-3 rounded-xl border-2 transition-all hover:scale-105 ${
+            className={`p-2 sm:p-3 rounded-lg sm:rounded-xl border-2 transition-all hover:scale-105 ${
               value === emoji.score 
                 ? `${emoji.color} border-gray-400 shadow-md` 
                 : 'bg-gray-50 border-gray-200 hover:border-gray-300'
             }`}
           >
-            <div className="text-2xl mb-1">{emoji.emoji}</div>
+            <div className="text-lg sm:text-2xl mb-1">{emoji.emoji}</div>
             <div className="text-xs font-medium">{emoji.score}</div>
           </button>
         ))}
@@ -164,15 +163,15 @@ export const MoodTracker: React.FC = () => {
   const monthlyAvg = getAverages(30);
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${theme.bg} -m-8 p-8`}>
-      <div className="space-y-6">
+    <div className={`min-h-screen bg-gradient-to-br ${theme.bg} p-4 sm:p-6 lg:p-8`}>
+      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <h3 className="text-2xl font-bold text-gray-900">Mood Tracker</h3>
-          <div className="flex space-x-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Mood Tracker</h3>
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setViewMode('recent')}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                 viewMode === 'recent' ? `bg-${theme.primary}-600 text-white` : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
@@ -180,7 +179,7 @@ export const MoodTracker: React.FC = () => {
             </button>
             <button
               onClick={() => setViewMode('trends')}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                 viewMode === 'trends' ? `bg-${theme.primary}-600 text-white` : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
@@ -191,7 +190,7 @@ export const MoodTracker: React.FC = () => {
                 setViewMode('insights');
                 if (!insights) loadInsights();
               }}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                 viewMode === 'insights' ? `bg-${theme.primary}-600 text-white` : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
@@ -199,10 +198,11 @@ export const MoodTracker: React.FC = () => {
             </button>
             <button
               onClick={() => setShowAddForm(true)}
-              className={`flex items-center space-x-2 bg-${theme.primary}-600 text-white px-4 py-2 rounded-lg hover:bg-${theme.primary}-700 transition-colors`}
+              className={`flex items-center space-x-1 sm:space-x-2 bg-${theme.primary}-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-${theme.primary}-700 transition-colors text-xs sm:text-sm`}
             >
-              <Plus className="h-4 w-4" />
-              <span>Log Mood</span>
+              <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Log Mood</span>
+              <span className="sm:hidden">Log</span>
             </button>
           </div>
         </div>
@@ -210,7 +210,7 @@ export const MoodTracker: React.FC = () => {
         {/* Error Display */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className="text-red-800">{error}</p>
+            <p className="text-red-800 text-sm">{error}</p>
           </div>
         )}
 
@@ -219,21 +219,21 @@ export const MoodTracker: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {weeklyAvg && (
               <div className="bg-white/80 backdrop-blur-sm p-4 rounded-xl border border-gray-200 shadow-sm">
-                <h4 className="font-semibold text-gray-900 mb-3 flex items-center space-x-2">
+                <h4 className="font-semibold text-gray-900 mb-3 flex items-center space-x-2 text-sm sm:text-base">
                   <Calendar className="h-4 w-4" />
                   <span>Last 7 Days</span>
                 </h4>
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
-                    <div className="text-2xl mb-1">{moodEmojis.find(e => e.score === Math.round(weeklyAvg.mood))?.emoji}</div>
+                    <div className="text-xl sm:text-2xl mb-1">{moodEmojis.find(e => e.score === Math.round(weeklyAvg.mood))?.emoji}</div>
                     <div className="text-xs text-gray-600">Mood</div>
                   </div>
                   <div>
-                    <div className="text-2xl mb-1">{energyEmojis.find(e => e.score === Math.round(weeklyAvg.energy))?.emoji}</div>
+                    <div className="text-xl sm:text-2xl mb-1">{energyEmojis.find(e => e.score === Math.round(weeklyAvg.energy))?.emoji}</div>
                     <div className="text-xs text-gray-600">Energy</div>
                   </div>
                   <div>
-                    <div className="text-2xl mb-1">{focusEmojis.find(e => e.score === Math.round(weeklyAvg.focus))?.emoji}</div>
+                    <div className="text-xl sm:text-2xl mb-1">{focusEmojis.find(e => e.score === Math.round(weeklyAvg.focus))?.emoji}</div>
                     <div className="text-xs text-gray-600">Focus</div>
                   </div>
                 </div>
@@ -242,21 +242,21 @@ export const MoodTracker: React.FC = () => {
             
             {monthlyAvg && (
               <div className="bg-white/80 backdrop-blur-sm p-4 rounded-xl border border-gray-200 shadow-sm">
-                <h4 className="font-semibold text-gray-900 mb-3 flex items-center space-x-2">
+                <h4 className="font-semibold text-gray-900 mb-3 flex items-center space-x-2 text-sm sm:text-base">
                   <TrendingUp className="h-4 w-4" />
                   <span>Last 30 Days</span>
                 </h4>
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
-                    <div className="text-2xl mb-1">{moodEmojis.find(e => e.score === Math.round(monthlyAvg.mood))?.emoji}</div>
+                    <div className="text-xl sm:text-2xl mb-1">{moodEmojis.find(e => e.score === Math.round(monthlyAvg.mood))?.emoji}</div>
                     <div className="text-xs text-gray-600">Mood</div>
                   </div>
                   <div>
-                    <div className="text-2xl mb-1">{energyEmojis.find(e => e.score === Math.round(monthlyAvg.energy))?.emoji}</div>
+                    <div className="text-xl sm:text-2xl mb-1">{energyEmojis.find(e => e.score === Math.round(monthlyAvg.energy))?.emoji}</div>
                     <div className="text-xs text-gray-600">Energy</div>
                   </div>
                   <div>
-                    <div className="text-2xl mb-1">{focusEmojis.find(e => e.score === Math.round(monthlyAvg.focus))?.emoji}</div>
+                    <div className="text-xl sm:text-2xl mb-1">{focusEmojis.find(e => e.score === Math.round(monthlyAvg.focus))?.emoji}</div>
                     <div className="text-xs text-gray-600">Focus</div>
                   </div>
                 </div>
@@ -267,11 +267,11 @@ export const MoodTracker: React.FC = () => {
 
         {/* Add Mood Form */}
         {showAddForm && (
-          <div className="bg-white/90 backdrop-blur-sm p-6 rounded-xl border border-gray-200 shadow-sm">
-            <form onSubmit={handleCreateEntry} className="space-y-6">
+          <div className="bg-white/90 backdrop-blur-sm p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm">
+            <form onSubmit={handleCreateEntry} className="space-y-4 sm:space-y-6">
               <EmojiSelector
                 label="Mood"
-                icon={<Heart className="h-5 w-5 text-pink-600" />}
+                icon={<Heart className="h-4 w-4 sm:h-5 sm:w-5 text-pink-600" />}
                 value={newEntry.mood_score}
                 onChange={(value) => setNewEntry({ ...newEntry, mood_score: value })}
                 emojis={moodEmojis}
@@ -279,7 +279,7 @@ export const MoodTracker: React.FC = () => {
               
               <EmojiSelector
                 label="Energy Level"
-                icon={<Battery className="h-5 w-5 text-green-600" />}
+                icon={<Battery className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />}
                 value={newEntry.energy_level}
                 onChange={(value) => setNewEntry({ ...newEntry, energy_level: value })}
                 emojis={energyEmojis}
@@ -287,7 +287,7 @@ export const MoodTracker: React.FC = () => {
               
               <EmojiSelector
                 label="Focus Level"
-                icon={<Focus className="h-5 w-5 text-blue-600" />}
+                icon={<Focus className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />}
                 value={newEntry.focus_level}
                 onChange={(value) => setNewEntry({ ...newEntry, focus_level: value })}
                 emojis={focusEmojis}
@@ -301,22 +301,22 @@ export const MoodTracker: React.FC = () => {
                   value={newEntry.notes}
                   onChange={(e) => setNewEntry({ ...newEntry, notes: e.target.value })}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                   placeholder="How are you feeling today?"
                 />
               </div>
 
-              <div className="flex space-x-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   type="submit"
-                  className={`bg-${theme.primary}-600 text-white px-4 py-2 rounded-lg hover:bg-${theme.primary}-700 transition-colors`}
+                  className={`bg-${theme.primary}-600 text-white px-4 py-2 rounded-lg hover:bg-${theme.primary}-700 transition-colors text-sm`}
                 >
                   Save Entry
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowAddForm(false)}
-                  className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+                  className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors text-sm"
                 >
                   Cancel
                 </button>
@@ -328,8 +328,8 @@ export const MoodTracker: React.FC = () => {
         {/* Content based on view mode */}
         {viewMode === 'recent' && (
           <div className="space-y-3">
-            <h4 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-              <TrendingUp className="h-5 w-5" />
+            <h4 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center space-x-2">
+              <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
               <span>Recent Entries</span>
             </h4>
             
@@ -346,19 +346,19 @@ export const MoodTracker: React.FC = () => {
                   className="bg-white/80 backdrop-blur-sm p-4 rounded-xl border border-gray-200 shadow-sm"
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm text-gray-500">
+                    <span className="text-xs sm:text-sm text-gray-500">
                       {new Date(entry.created_at).toLocaleDateString()} at{' '}
                       {new Date(entry.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
                   
-                  <div className="grid grid-cols-3 gap-4 mb-3">
+                  <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-3">
                     <div className="text-center">
                       <div className="flex items-center justify-center space-x-1 mb-1">
-                        <Heart className="h-4 w-4 text-pink-600" />
+                        <Heart className="h-3 w-3 sm:h-4 sm:w-4 text-pink-600" />
                         <span className="text-xs text-gray-600">Mood</span>
                       </div>
-                      <div className="text-2xl mb-1">
+                      <div className="text-xl sm:text-2xl mb-1">
                         {moodEmojis.find(e => e.score === entry.mood_score)?.emoji}
                       </div>
                       <div className="text-xs text-gray-600">
@@ -368,10 +368,10 @@ export const MoodTracker: React.FC = () => {
                     
                     <div className="text-center">
                       <div className="flex items-center justify-center space-x-1 mb-1">
-                        <Battery className="h-4 w-4 text-green-600" />
+                        <Battery className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
                         <span className="text-xs text-gray-600">Energy</span>
                       </div>
-                      <div className="text-2xl mb-1">
+                      <div className="text-xl sm:text-2xl mb-1">
                         {energyEmojis.find(e => e.score === entry.energy_level)?.emoji}
                       </div>
                       <div className="text-xs text-gray-600">
@@ -381,10 +381,10 @@ export const MoodTracker: React.FC = () => {
                     
                     <div className="text-center">
                       <div className="flex items-center justify-center space-x-1 mb-1">
-                        <Focus className="h-4 w-4 text-blue-600" />
+                        <Focus className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
                         <span className="text-xs text-gray-600">Focus</span>
                       </div>
-                      <div className="text-2xl mb-1">
+                      <div className="text-xl sm:text-2xl mb-1">
                         {focusEmojis.find(e => e.score === entry.focus_level)?.emoji}
                       </div>
                       <div className="text-xs text-gray-600">
@@ -414,16 +414,16 @@ export const MoodTracker: React.FC = () => {
             ) : insights ? (
               <>
                 {insights.productivity_patterns.length > 0 && (
-                  <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-gray-200">
-                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center space-x-2">
-                      <TrendingUp className="h-5 w-5 text-blue-600" />
+                  <div className="bg-white/80 backdrop-blur-sm p-4 sm:p-6 rounded-xl border border-gray-200">
+                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center space-x-2 text-sm sm:text-base">
+                      <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
                       <span>Productivity Patterns</span>
                     </h4>
                     <ul className="space-y-2">
                       {insights.productivity_patterns.map((pattern, index) => (
                         <li key={index} className="flex items-start space-x-2">
                           <span className="text-blue-500 mt-1">•</span>
-                          <span className="text-gray-700">{pattern}</span>
+                          <span className="text-gray-700 text-sm">{pattern}</span>
                         </li>
                       ))}
                     </ul>
@@ -431,16 +431,16 @@ export const MoodTracker: React.FC = () => {
                 )}
 
                 {insights.personalized_recommendations.length > 0 && (
-                  <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-xl border border-purple-200">
-                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center space-x-2">
-                      <Lightbulb className="h-5 w-5 text-purple-600" />
+                  <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-4 sm:p-6 rounded-xl border border-purple-200">
+                    <h4 className="font-semibold text-purple-900 mb-3 flex items-center space-x-2 text-sm sm:text-base">
+                      <Lightbulb className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />
                       <span>Recommendations</span>
                     </h4>
                     <ul className="space-y-2">
                       {insights.personalized_recommendations.map((recommendation, index) => (
                         <li key={index} className="flex items-start space-x-2">
                           <span className="text-purple-500 mt-1">•</span>
-                          <span className="text-purple-800">{recommendation}</span>
+                          <span className="text-purple-800 text-sm">{recommendation}</span>
                         </li>
                       ))}
                     </ul>
