@@ -13,6 +13,16 @@ export interface ExtendedTask extends Task {
   isExpanded?: boolean;
 }
 
+interface TaskSuggestion {
+  title: string;
+  description: string;
+  priority: 'low' | 'medium' | 'high';
+  estimated_time?: string;
+  subtasks?: string[];
+  tags?: string[];
+  complexity?: number;
+}
+
 export const TaskManager: React.FC = () => {
   const { 
     tasks, 
@@ -26,22 +36,14 @@ export const TaskManager: React.FC = () => {
 
   const [showForm, setShowForm] = useState(false);
   const [editingTask, setEditingTask] = useState<ExtendedTask | null>(null);
-  const [aiLoading, setAiLoading] = useState(false);
 
   useEffect(() => {
     loadTasks();
   }, [loadTasks]);
 
   // Convert database status to component status
-  const convertStatus = (dbStatus: Task['status']): 'todo' | 'in_progress' | 'completed' => {
-    if (dbStatus === 'pending') return 'todo';
-    return dbStatus as 'todo' | 'in_progress' | 'completed';
-  };
-
-  // Convert component status to database status
-  const convertToDbStatus = (status: 'todo' | 'in_progress' | 'completed'): Task['status'] => {
-    if (status === 'todo') return 'pending';
-    return status;
+  const convertStatus = (dbStatus: Task['status']): Task['status'] => {
+    return dbStatus;
   };
 
   const extendedTasks: ExtendedTask[] = tasks.map(task => ({
@@ -58,7 +60,8 @@ export const TaskManager: React.FC = () => {
         description: formData.description,
         priority: formData.priority,
         due_date: formData.due_date,
-        tags: formData.tags || []
+        tags: formData.tags || [],
+        status: 'pending'
       });
       setShowForm(false);
     } catch (error) {
@@ -91,9 +94,9 @@ export const TaskManager: React.FC = () => {
     }
   };
 
-  const handleStatusChange = async (taskId: string, status: 'todo' | 'in_progress' | 'completed') => {
+  const handleStatusChange = async (taskId: string, status: Task['status']) => {
     try {
-      await updateTask(taskId, { status: convertToDbStatus(status) });
+      await updateTask(taskId, { status });
     } catch (error) {
       console.error('Error updating task status:', error);
     }
@@ -103,30 +106,39 @@ export const TaskManager: React.FC = () => {
     setEditingTask(task);
   };
 
-  const handleWorkloadBreakdown = async (input: string) => {
-    setAiLoading(true);
+  const handleAITaskAdd = async (taskSuggestion: TaskSuggestion) => {
     try {
-      // Simple AI breakdown simulation
-      const breakdown = [
-        { title: `Research: ${input}`, priority: 'medium' as const },
-        { title: `Plan: ${input}`, priority: 'high' as const },
-        { title: `Execute: ${input}`, priority: 'medium' as const },
-        { title: `Review: ${input}`, priority: 'low' as const }
-      ];
-      
-      for (const task of breakdown) {
+      await createTask({
+        title: taskSuggestion.title,
+        description: taskSuggestion.description,
+        priority: taskSuggestion.priority,
+        tags: taskSuggestion.tags || [],
+        status: 'pending'
+      });
+    } catch (error) {
+      console.error('Error adding AI-suggested task:', error);
+    }
+  };
+
+  const handleAddAllAITasks = async (taskSuggestions: TaskSuggestion[]) => {
+    try {
+      for (const task of taskSuggestions) {
         await createTask({
           title: task.title,
-          description: `Auto-generated from: ${input}`,
+          description: task.description,
           priority: task.priority,
-          tags: ['ai-generated']
+          tags: task.tags || [],
+          status: 'pending'
         });
       }
     } catch (error) {
-      console.error('Error breaking down workload:', error);
-    } finally {
-      setAiLoading(false);
+      console.error('Error adding all AI-suggested tasks:', error);
     }
+  };
+
+  const handleWorkloadBreakdown = async (input: string) => {
+    // This is handled by the WorkloadBreakdown component now
+    console.log('Workload breakdown input:', input);
   };
 
   if (loading) {
@@ -168,7 +180,9 @@ export const TaskManager: React.FC = () => {
 
       <WorkloadBreakdown
         onBreakdown={handleWorkloadBreakdown}
-        aiLoading={aiLoading}
+        aiLoading={false}
+        onTaskAdd={handleAITaskAdd}
+        onAddAllTasks={handleAddAllAITasks}
       />
 
       {/* Task Form */}

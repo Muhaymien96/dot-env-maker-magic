@@ -6,18 +6,18 @@ import {
   Tag,
   MoreHorizontal,
   Play,
-  RotateCcw,
   CheckCircle,
   Edit3,
   Trash2
 } from 'lucide-react';
 import { ExtendedTask } from './TaskManager';
+import { Task } from '../lib/supabase';
 
 interface SimpleTaskCardProps {
   task: ExtendedTask;
   onEdit: (task: ExtendedTask) => void;
   onDelete: (taskId: string) => void;
-  onStatusChange?: (taskId: string, status: 'todo' | 'in_progress' | 'completed') => void;
+  onStatusChange?: (taskId: string, status: Task['status']) => void;
 }
 
 export const SimpleTaskCard: React.FC<SimpleTaskCardProps> = ({
@@ -46,7 +46,7 @@ export const SimpleTaskCard: React.FC<SimpleTaskCardProps> = ({
       case 'completed':
         return (
           <button
-            onClick={() => onStatusChange?.(task.id, 'todo')}
+            onClick={() => onStatusChange?.(task.id, 'pending')}
             className="p-2 text-green-600 hover:bg-green-50 rounded-full"
             title="Mark as pending"
           >
