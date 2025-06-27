@@ -3,26 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { useTasksStore } from '../store';
 import { TaskForm } from './TaskForm';
-import { TaskCard } from './TaskCard';
+import { SimpleTaskCard } from './SimpleTaskCard';
 import { WorkloadBreakdown } from './WorkloadBreakdown';
 import { TasksHeader } from './TasksHeader';
+import { Task } from '../lib/supabase';
 
-export interface ExtendedTask {
-  id: string;
-  title: string;
-  description?: string;
-  priority: 'low' | 'medium' | 'high';
-  status: 'todo' | 'in_progress' | 'completed';
-  due_date?: string;
-  estimated_duration?: number;
-  energy_required?: 'low' | 'medium' | 'high';
-  focus_required?: 'low' | 'medium' | 'high';
-  created_at: string;
-  updated_at: string;
-  user_id: string;
-  dependencies?: string[];
+export interface ExtendedTask extends Task {
   subtasks?: ExtendedTask[];
-  tags?: string[];
+  isExpanded?: boolean;
 }
 
 export const TaskManager: React.FC = () => {
@@ -30,7 +18,7 @@ export const TaskManager: React.FC = () => {
     tasks, 
     loading, 
     error, 
-    fetchTasks, 
+    loadTasks, 
     createTask, 
     updateTask, 
     deleteTask 
@@ -38,56 +26,30 @@ export const TaskManager: React.FC = () => {
 
   const [showForm, setShowForm] = useState(false);
   const [editingTask, setEditingTask] = useState<ExtendedTask | null>(null);
-  const [filterStatus, setFilterStatus] = useState<'all' | 'todo' | 'in_progress' | 'completed'>('all');
-  const [filterPriority, setFilterPriority] = useState<'all' | 'low' | 'medium' | 'high'>('all');
-  const [sortBy, setSortBy] = useState<'due_date' | 'priority' | 'created_at'>('created_at');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
 
   useEffect(() => {
-    fetchTasks();
-  }, [fetchTasks]);
+    loadTasks();
+  }, [loadTasks]);
 
-  const getFilteredTasks = () => {
-    let filteredTasks = [...tasks];
-
-    if (searchQuery) {
-      filteredTasks = filteredTasks.filter(task =>
-        task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (task.description && task.description.toLowerCase().includes(searchQuery.toLowerCase()))
-      );
-    }
-
-    if (filterStatus !== 'all') {
-      filteredTasks = filteredTasks.filter(task => task.status === filterStatus);
-    }
-
-    if (filterPriority !== 'all') {
-      filteredTasks = filteredTasks.filter(task => task.priority === filterPriority);
-    }
-
-    return filteredTasks;
+  // Convert database status to component status
+  const convertStatus = (dbStatus: Task['status']): 'todo' | 'in_progress' | 'completed' => {
+    if (dbStatus === 'pending') return 'todo';
+    return dbStatus as 'todo' | 'in_progress' | 'completed';
   };
 
-  const getSortedTasks = (tasks: ExtendedTask[]) => {
-    let sortedTasks = [...tasks];
-
-    sortedTasks.sort((a, b) => {
-      if (sortBy === 'due_date') {
-        const dateA = a.due_date ? new Date(a.due_date).getTime() : Infinity;
-        const dateB = b.due_date ? new Date(b.due_date).getTime() : Infinity;
-        return dateA - dateB;
-      } else if (sortBy === 'priority') {
-        const priorityOrder = { 'high': 1, 'medium': 2, 'low': 3 };
-        return (priorityOrder[a.priority] || 4) - (priorityOrder[b.priority] || 4);
-      } else {
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      }
-    });
-
-    return sortedTasks;
+  // Convert component status to database status
+  const convertToDbStatus = (status: 'todo' | 'in_progress' | 'completed'): Task['status'] => {
+    if (status === 'todo') return 'pending';
+    return status;
   };
 
-  const filteredAndSortedTasks = getSortedTasks(getFilteredTasks());
+  const extendedTasks: ExtendedTask[] = tasks.map(task => ({
+    ...task,
+    status: convertStatus(task.status),
+    subtasks: [],
+    isExpanded: false
+  }));
 
   const handleCreateTask = async (formData: any) => {
     try {
@@ -96,10 +58,6 @@ export const TaskManager: React.FC = () => {
         description: formData.description,
         priority: formData.priority,
         due_date: formData.due_date,
-        estimated_duration: formData.estimated_duration,
-        energy_required: formData.energy_required,
-        focus_required: formData.focus_required,
-        dependencies: formData.dependencies || [],
         tags: formData.tags || []
       });
       setShowForm(false);
@@ -117,10 +75,6 @@ export const TaskManager: React.FC = () => {
         description: formData.description,
         priority: formData.priority,
         due_date: formData.due_date,
-        estimated_duration: formData.estimated_duration,
-        energy_required: formData.energy_required,
-        focus_required: formData.focus_required,
-        dependencies: formData.dependencies || [],
         tags: formData.tags || []
       });
       setEditingTask(null);
@@ -139,7 +93,7 @@ export const TaskManager: React.FC = () => {
 
   const handleStatusChange = async (taskId: string, status: 'todo' | 'in_progress' | 'completed') => {
     try {
-      await updateTask(taskId, { status });
+      await updateTask(taskId, { status: convertToDbStatus(status) });
     } catch (error) {
       console.error('Error updating task status:', error);
     }
@@ -147,6 +101,32 @@ export const TaskManager: React.FC = () => {
 
   const handleEditTask = (task: ExtendedTask) => {
     setEditingTask(task);
+  };
+
+  const handleWorkloadBreakdown = async (input: string) => {
+    setAiLoading(true);
+    try {
+      // Simple AI breakdown simulation
+      const breakdown = [
+        { title: `Research: ${input}`, priority: 'medium' as const },
+        { title: `Plan: ${input}`, priority: 'high' as const },
+        { title: `Execute: ${input}`, priority: 'medium' as const },
+        { title: `Review: ${input}`, priority: 'low' as const }
+      ];
+      
+      for (const task of breakdown) {
+        await createTask({
+          title: task.title,
+          description: `Auto-generated from: ${input}`,
+          priority: task.priority,
+          tags: ['ai-generated']
+        });
+      }
+    } catch (error) {
+      console.error('Error breaking down workload:', error);
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   if (loading) {
@@ -162,7 +142,7 @@ export const TaskManager: React.FC = () => {
       <div className="text-center py-8">
         <p className="text-red-600 mb-4">Error loading tasks: {error}</p>
         <button 
-          onClick={() => fetchTasks()}
+          onClick={() => loadTasks()}
           className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
         >
           Retry
@@ -171,13 +151,25 @@ export const TaskManager: React.FC = () => {
     );
   }
 
+  const completedTasksCount = extendedTasks.filter(task => task.status === 'completed').length;
+
   return (
     <div className="space-y-6">
       <TasksHeader
-        onCreateTask={() => setShowForm(true)}
+        completedTasksCount={completedTasksCount}
+        onAddTask={() => setShowForm(true)}
+        onClearCompleted={async () => {
+          const completedTasks = extendedTasks.filter(task => task.status === 'completed');
+          for (const task of completedTasks) {
+            await handleDeleteTask(task.id);
+          }
+        }}
       />
 
-      <WorkloadBreakdown />
+      <WorkloadBreakdown
+        onBreakdown={handleWorkloadBreakdown}
+        aiLoading={aiLoading}
+      />
 
       {/* Task Form */}
       {showForm && (
@@ -185,6 +177,7 @@ export const TaskManager: React.FC = () => {
           <TaskForm
             onSubmit={handleCreateTask}
             onCancel={() => setShowForm(false)}
+            availableTasks={extendedTasks}
           />
         </div>
       )}
@@ -196,40 +189,35 @@ export const TaskManager: React.FC = () => {
             isEdit={true}
             onSubmit={handleUpdateTask}
             onCancel={() => setEditingTask(null)}
+            availableTasks={extendedTasks}
           />
         </div>
       )}
 
       {/* Tasks List */}
       <div className="space-y-4">
-        {filteredAndSortedTasks.length === 0 ? (
+        {extendedTasks.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-gray-400 mb-4">
               <Plus className="h-12 w-12 mx-auto" />
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">No tasks found</h3>
-            <p className="text-gray-500 mb-4">
-              {searchQuery || filterStatus !== 'all' || filterPriority !== 'all' 
-                ? 'Try adjusting your filters or search query'
-                : 'Create your first task to get started'
-              }
-            </p>
-            {!searchQuery && filterStatus === 'all' && filterPriority === 'all' && (
-              <button
-                onClick={() => setShowForm(true)}
-                className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
-              >
-                Create Task
-              </button>
-            )}
+            <p className="text-gray-500 mb-4">Create your first task to get started</p>
+            <button
+              onClick={() => setShowForm(true)}
+              className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+            >
+              Create Task
+            </button>
           </div>
         ) : (
-          filteredAndSortedTasks.map((task) => (
-            <TaskCard
+          extendedTasks.map((task) => (
+            <SimpleTaskCard
               key={task.id}
               task={task}
               onEdit={handleEditTask}
               onDelete={handleDeleteTask}
+              onStatusChange={handleStatusChange}
             />
           ))
         )}

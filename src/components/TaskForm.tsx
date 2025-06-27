@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Calendar, Clock, Zap, Target, Tag, Link } from 'lucide-react';
 import { ExtendedTask } from './TaskManager';
 
