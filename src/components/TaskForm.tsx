@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, Tag, AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Calendar, Tag } from 'lucide-react';
 import { ExtendedTask } from './TaskManager';
 
 interface TaskFormProps {
@@ -8,15 +8,13 @@ interface TaskFormProps {
   isEdit?: boolean;
   onSubmit: (formData: any) => void;
   onCancel: () => void;
-  availableTasks: ExtendedTask[];
 }
 
 export const TaskForm: React.FC<TaskFormProps> = ({
   task,
   isEdit = false,
   onSubmit,
-  onCancel,
-  availableTasks
+  onCancel
 }) => {
   const [title, setTitle] = useState(task?.title || '');
   const [description, setDescription] = useState(task?.description || '');

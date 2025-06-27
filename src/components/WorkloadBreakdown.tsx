@@ -15,14 +15,12 @@ interface TaskSuggestion {
 }
 
 interface WorkloadBreakdownProps {
-  onBreakdown: (input: string) => void;
   aiLoading: boolean;
   onTaskAdd?: (task: TaskSuggestion) => void;
   onAddAllTasks?: (tasks: TaskSuggestion[]) => void;
 }
 
 export const WorkloadBreakdown: React.FC<WorkloadBreakdownProps> = ({
-  onBreakdown,
   aiLoading,
   onTaskAdd,
   onAddAllTasks
@@ -40,7 +38,6 @@ export const WorkloadBreakdown: React.FC<WorkloadBreakdownProps> = ({
         input: workloadInput,
         type: 'task',
         context: {
-          workload_breakdown: true,
           include_historical_data: true
         }
       });
@@ -59,20 +56,18 @@ export const WorkloadBreakdown: React.FC<WorkloadBreakdownProps> = ({
     }
   };
 
-  const handleTaskAdd = (task: TaskSuggestion) => {
-    // Remove from suggested tasks
-    setSuggestedTasks(prev => prev.filter(t => t.title !== task.title));
-    
-    // Add to main task list
+  const handleTaskAdd = async (task: TaskSuggestion) => {
     if (onTaskAdd) {
-      onTaskAdd(task);
+      await onTaskAdd(task);
+      // Remove only this specific task from suggested tasks after successful addition
+      setSuggestedTasks(prev => prev.filter(t => t.title !== task.title));
     }
   };
 
-  const handleAddAllTasks = () => {
+  const handleAddAllTasks = async () => {
     if (onAddAllTasks && suggestedTasks.length > 0) {
-      onAddAllTasks(suggestedTasks);
-      setSuggestedTasks([]); // Clear all suggested tasks
+      await onAddAllTasks(suggestedTasks);
+      setSuggestedTasks([]); // Clear all suggested tasks after adding all
     }
   };
 

@@ -1,4 +1,15 @@
+
 import { useState } from 'react';
+
+interface TaskSuggestion {
+  title: string;
+  description: string;
+  priority: 'low' | 'medium' | 'high';
+  estimated_time?: string;
+  subtasks?: string[];
+  tags?: string[];
+  complexity?: number;
+}
 
 interface AICoachRequest {
   input: string;
@@ -23,6 +34,7 @@ interface AICoachResponse {
   encouragement: string;
   personalized_insights?: string[];
   recommended_strategies?: string[];
+  suggested_tasks?: TaskSuggestion[];
 }
 
 export const useAICoach = () => {
@@ -46,7 +58,7 @@ export const useAICoach = () => {
             ...request,
             context: {
               ...request.context,
-              include_historical_data: true, // Always include historical data for enhanced coaching
+              include_historical_data: true,
             }
           }),
         }

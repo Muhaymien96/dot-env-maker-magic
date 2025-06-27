@@ -36,12 +36,12 @@ export const TaskManager: React.FC = () => {
 
   const [showForm, setShowForm] = useState(false);
   const [editingTask, setEditingTask] = useState<ExtendedTask | null>(null);
+  const [isAddingTask, setIsAddingTask] = useState(false);
 
   useEffect(() => {
     loadTasks();
   }, [loadTasks]);
 
-  // Convert database status to component status
   const convertStatus = (dbStatus: Task['status']): Task['status'] => {
     return dbStatus;
   };
@@ -55,6 +55,7 @@ export const TaskManager: React.FC = () => {
 
   const handleCreateTask = async (formData: any) => {
     try {
+      setIsAddingTask(true);
       await createTask({
         title: formData.title,
         description: formData.description,
@@ -66,6 +67,8 @@ export const TaskManager: React.FC = () => {
       setShowForm(false);
     } catch (error) {
       console.error('Error creating task:', error);
+    } finally {
+      setIsAddingTask(false);
     }
   };
 
@@ -108,6 +111,7 @@ export const TaskManager: React.FC = () => {
 
   const handleAITaskAdd = async (taskSuggestion: TaskSuggestion) => {
     try {
+      setIsAddingTask(true);
       await createTask({
         title: taskSuggestion.title,
         description: taskSuggestion.description,
@@ -117,11 +121,14 @@ export const TaskManager: React.FC = () => {
       });
     } catch (error) {
       console.error('Error adding AI-suggested task:', error);
+    } finally {
+      setIsAddingTask(false);
     }
   };
 
   const handleAddAllAITasks = async (taskSuggestions: TaskSuggestion[]) => {
     try {
+      setIsAddingTask(true);
       for (const task of taskSuggestions) {
         await createTask({
           title: task.title,
@@ -133,12 +140,9 @@ export const TaskManager: React.FC = () => {
       }
     } catch (error) {
       console.error('Error adding all AI-suggested tasks:', error);
+    } finally {
+      setIsAddingTask(false);
     }
-  };
-
-  const handleWorkloadBreakdown = async (input: string) => {
-    // This is handled by the WorkloadBreakdown component now
-    console.log('Workload breakdown input:', input);
   };
 
   if (loading) {
@@ -179,8 +183,7 @@ export const TaskManager: React.FC = () => {
       />
 
       <WorkloadBreakdown
-        onBreakdown={handleWorkloadBreakdown}
-        aiLoading={false}
+        aiLoading={isAddingTask}
         onTaskAdd={handleAITaskAdd}
         onAddAllTasks={handleAddAllAITasks}
       />
@@ -191,7 +194,6 @@ export const TaskManager: React.FC = () => {
           <TaskForm
             onSubmit={handleCreateTask}
             onCancel={() => setShowForm(false)}
-            availableTasks={extendedTasks}
           />
         </div>
       )}
@@ -203,8 +205,17 @@ export const TaskManager: React.FC = () => {
             isEdit={true}
             onSubmit={handleUpdateTask}
             onCancel={() => setEditingTask(null)}
-            availableTasks={extendedTasks}
           />
+        </div>
+      )}
+
+      {/* Task addition loading indicator */}
+      {isAddingTask && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-blue-800">Adding task...</span>
+          </div>
         </div>
       )}
 
