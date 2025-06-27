@@ -23,6 +23,7 @@ interface AICoachRequest {
     focus_mode_active?: boolean;
     is_stuck_request?: boolean;
     neurodivergent_type?: 'none' | 'adhd' | 'autism' | 'anxiety' | 'multiple';
+    workload_breakdown?: boolean;
   };
 }
 
@@ -59,6 +60,7 @@ export const useAICoach = () => {
             context: {
               ...request.context,
               include_historical_data: true,
+              workload_breakdown: true,
             }
           }),
         }
@@ -69,6 +71,7 @@ export const useAICoach = () => {
       }
 
       const data = await response.json();
+      console.log('AI Coach Response:', data);
       return data;
     } catch (err) {
       console.error('AI Coach error:', err);

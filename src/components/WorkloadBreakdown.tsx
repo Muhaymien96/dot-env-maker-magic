@@ -33,20 +33,29 @@ export const WorkloadBreakdown: React.FC<WorkloadBreakdownProps> = ({
   const handleBreakdown = async () => {
     if (!workloadInput.trim()) return;
 
+    console.log('Starting breakdown with input:', workloadInput);
+    
     try {
       const response = await getCoachingResponse({
         input: workloadInput,
         type: 'task',
         context: {
-          include_historical_data: true
+          include_historical_data: true,
+          workload_breakdown: true
         }
       });
+
+      console.log('Received response:', response);
 
       if (response) {
         setAiResponse(response);
         // Extract suggested tasks from the response
-        if (response.suggested_tasks) {
+        if (response.suggested_tasks && response.suggested_tasks.length > 0) {
+          console.log('Setting suggested tasks:', response.suggested_tasks);
           setSuggestedTasks(response.suggested_tasks);
+        } else {
+          console.log('No suggested tasks found in response');
+          setSuggestedTasks([]);
         }
       }
       
@@ -57,24 +66,37 @@ export const WorkloadBreakdown: React.FC<WorkloadBreakdownProps> = ({
   };
 
   const handleTaskAdd = async (task: TaskSuggestion) => {
+    console.log('Adding task:', task);
     if (onTaskAdd) {
       await onTaskAdd(task);
       // Remove only this specific task from suggested tasks after successful addition
-      setSuggestedTasks(prev => prev.filter(t => t.title !== task.title));
+      setSuggestedTasks(prev => {
+        const updated = prev.filter(t => t.title !== task.title);
+        console.log('Updated suggested tasks:', updated);
+        return updated;
+      });
     }
   };
 
   const handleAddAllTasks = async () => {
     if (onAddAllTasks && suggestedTasks.length > 0) {
+      console.log('Adding all tasks:', suggestedTasks);
       await onAddAllTasks(suggestedTasks);
       setSuggestedTasks([]); // Clear all suggested tasks after adding all
     }
   };
 
   const handleRejectSuggestions = () => {
+    console.log('Rejecting suggestions');
     setAiResponse(null);
     setSuggestedTasks([]);
   };
+
+  console.log('Current state:', { 
+    aiResponse: !!aiResponse, 
+    suggestedTasksCount: suggestedTasks.length,
+    isLoading: aiCoachLoading || aiLoading 
+  });
 
   return (
     <div className="space-y-4">
@@ -116,7 +138,7 @@ export const WorkloadBreakdown: React.FC<WorkloadBreakdownProps> = ({
         </div>
       </div>
 
-      {aiResponse && suggestedTasks.length > 0 && (
+      {aiResponse && (
         <AICoachResponse
           response={{
             ...aiResponse,

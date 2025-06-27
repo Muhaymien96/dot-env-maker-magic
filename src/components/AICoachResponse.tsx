@@ -24,9 +24,11 @@ interface TaskSuggestion {
 interface AICoachResponseProps {
   response: {
     suggestions?: TaskSuggestion[];
+    suggested_tasks?: TaskSuggestion[];
     insights?: string[];
     priority_suggestion?: 'low' | 'medium' | 'high';
     coaching_message?: string;
+    coaching_response?: string;
     breakdown?: {
       tasks: TaskSuggestion[];
       insights: string[];
@@ -34,6 +36,11 @@ interface AICoachResponseProps {
       complexity_analysis: string;
     };
     message?: string;
+    encouragement?: string;
+    overall_strategy?: string;
+    time_estimate?: string;
+    personalized_insights?: string[];
+    recommended_strategies?: string[];
   };
   onSubtaskAdd?: (subtask: string, parentId?: string) => void;
   onTaskAdd?: (task: TaskSuggestion) => void;
@@ -72,11 +79,20 @@ export const AICoachResponse: React.FC<AICoachResponseProps> = ({
     ));
   };
 
-  if (!response) return null;
+  if (!response) {
+    console.log('No response provided to AICoachResponse');
+    return null;
+  }
 
-  const tasks = response.breakdown?.tasks || response.suggestions || [];
-  const insights = response.breakdown?.insights || response.insights || [];
-  const message = response.coaching_message || response.message || '';
+  const tasks = response.suggested_tasks || response.breakdown?.tasks || response.suggestions || [];
+  const insights = response.personalized_insights || response.breakdown?.insights || response.insights || [];
+  const message = response.coaching_response || response.coaching_message || response.message || '';
+
+  console.log('AICoachResponse rendering with:', { 
+    tasksCount: tasks.length, 
+    insightsCount: insights.length, 
+    hasMessage: !!message 
+  });
 
   return (
     <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-xl border border-purple-200 space-y-4">
@@ -102,6 +118,19 @@ export const AICoachResponse: React.FC<AICoachResponseProps> = ({
         </div>
       )}
 
+      {response.encouragement && (
+        <div className="bg-green-50/70 p-4 rounded-lg border border-green-200">
+          <p className="text-green-800 font-medium">{response.encouragement}</p>
+        </div>
+      )}
+
+      {response.overall_strategy && (
+        <div className="bg-blue-50/70 p-4 rounded-lg border border-blue-200">
+          <h5 className="font-medium text-blue-900 mb-2">Strategy</h5>
+          <p className="text-blue-800 text-sm">{response.overall_strategy}</p>
+        </div>
+      )}
+
       {insights.length > 0 && (
         <div className="bg-white/70 p-4 rounded-lg border border-purple-200">
           <h5 className="font-medium text-purple-900 mb-2 flex items-center space-x-2">
@@ -111,6 +140,17 @@ export const AICoachResponse: React.FC<AICoachResponseProps> = ({
           <ul className="space-y-1">
             {insights.map((insight, index) => (
               <li key={index} className="text-purple-700 text-sm">• {insight}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {response.recommended_strategies && response.recommended_strategies.length > 0 && (
+        <div className="bg-white/70 p-4 rounded-lg border border-purple-200">
+          <h5 className="font-medium text-purple-900 mb-2">Recommended Strategies</h5>
+          <ul className="space-y-1">
+            {response.recommended_strategies.map((strategy, index) => (
+              <li key={index} className="text-purple-700 text-sm">• {strategy}</li>
             ))}
           </ul>
         </div>
@@ -204,10 +244,10 @@ export const AICoachResponse: React.FC<AICoachResponseProps> = ({
         </div>
       )}
 
-      {response.breakdown?.time_estimate && (
+      {response.time_estimate && (
         <div className="bg-white/70 p-3 rounded-lg border border-purple-200">
           <p className="text-sm text-purple-700">
-            <strong>Estimated Time:</strong> {response.breakdown.time_estimate}
+            <strong>Total Estimated Time:</strong> {response.time_estimate}
           </p>
         </div>
       )}
